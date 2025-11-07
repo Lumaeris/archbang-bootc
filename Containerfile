@@ -15,7 +15,8 @@ RUN pacman -Sy --noconfirm \
       dbus \
       dbus-glib \
       glib2 \
-      shadow && \
+      shadow \
+      fastfetch && \
   pacman -S --clean --noconfirm && \
   rm -rf /var/cache/pacman/pkg/*
 
