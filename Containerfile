@@ -21,7 +21,7 @@ RUN pacman -Sy --noconfirm \
 
 # install archbang packages
 RUN curl -s 'https://raw.githubusercontent.com/mrgreen3/archbang/refs/heads/main/packages.x86_64' | \
-    sed '/grub/d;/os-prober/d;/syslinux/d;/efibootmgr/d;/arch-install-scripts/d;/^mkinitcpio/d;/firefox/d;/gparted/d' | \
+    sed '/grub/d;/os-prober/d;/syslinux/d;/efibootmgr/d;/arch-install-scripts/d;/^mkinitcpio/d;/gparted/d' | \
     grep -vE '^\s*#|^\s*$' | \
     xargs pacman -S --noconfirm --needed && \
     pacman -S --clean --noconfirm && \
