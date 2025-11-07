@@ -1,12 +1,12 @@
-# Arch Linux Bootc
+# ArchBang Bootc
 
-Experiment to see if Bootc could work on Arch Linux. And it does! With the composefs-backend :)
+An experiment with including some more packages of Arch-based distro and overwriting some system files. Based on bootcrew's [arch-bootc](https://github.com/bootcrew/arch-bootc). bootc cli was slightly patched in order to make `switch` and `upgrade` work (https://github.com/bootc-dev/bootc/pull/1735). While `switch` worked, I can't say the same for `upgrade` just yet.
 
-<img width="2335" height="1296" alt="image" src="https://github.com/user-attachments/assets/0a19ad09-fdb6-4b7f-96f0-28ae9df12889" />
+<img width="1024" height="768" alt="image" src="https://github.com/user-attachments/assets/adfb82f2-c3ce-4b2d-a301-653e46d1713e" />
 
-<img width="2305" height="846" alt="image" src="https://github.com/user-attachments/assets/f496a2f4-0782-408c-b207-c7acdde2e5ac" />
+## Why
 
-Its Arch! Its Bootc! Its cool!
+idk I'm bored. While thinking of some Arch-based distros I've got CachyOS, EndeavourOS and of course ArchBang (which apparently was called GreenBang at one point). Maybe I'll try redoing this experiment with some other distros just for fun.
 
 ## Building
 
@@ -14,6 +14,8 @@ In order to get a running arch-bootc system you can run the following steps:
 ```shell
 just build-containerfile # This will build the containerfile and all the dependencies you need
 just generate-bootable-image # Generates a bootable image for you using bootc!
+
+useradd -m -G wheel -s /bin/bash user # in order to create an user account in live system
 ```
 
 Then you can run the `bootable.img` as your boot disk in your preferred hypervisor.
