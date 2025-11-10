@@ -1,4 +1,4 @@
-FROM docker.io/archlinux/archlinux:latest AS builder
+FROM docker.io/archlinux/archlinux:latest
 
 ENV DRACUT_NO_XATTR=1
 RUN pacman -Sy --noconfirm \
@@ -6,7 +6,6 @@ RUN pacman -Sy --noconfirm \
       linux \
       linux-firmware \
       ostree \
-      systemd \
       btrfs-progs \
       e2fsprogs \
       xfsprogs \
@@ -22,7 +21,7 @@ RUN pacman -Sy --noconfirm \
 
 # install archbang packages
 RUN curl -s 'https://raw.githubusercontent.com/mrgreen3/archbang/refs/heads/main/packages.x86_64' | \
-    sed '/grub/d;/os-prober/d;/syslinux/d;/efibootmgr/d;/arch-install-scripts/d;/^mkinitcpio/d;/gparted/d' | \
+    sed '/grub/d;/os-prober/d;/syslinux/d;/efibootmgr/d;/arch-install-scripts/d;/^mkinitcpio/d;/gparted/d;/^systemd/d' | \
     grep -vE '^\s*#|^\s*$' | \
     xargs pacman -S --noconfirm --needed && \
     pacman -S --clean --noconfirm && \
@@ -64,21 +63,22 @@ RUN --mount=type=tmpfs,dst=/tmp \
 #    pacman -S --clean --noconfirm && \
 #    rm -rf /var/cache/pacman/pkg/*
 
-RUN rm -rf /boot /home /root /usr/local /srv && \
-    mkdir -p /var/{home,roothome,srv} /sysroot /boot && \
-    ln -s sysroot/ostree /ostree
-
-# Update useradd default to /var/home instead of /home for User Creation
-RUN sed -i 's|^HOME=.*|HOME=/var/home|' "/etc/default/useradd"
+# Necessary for general behavior expected by image-based systems
+RUN sed -i 's|^HOME=.*|HOME=/var/home|' "/etc/default/useradd" && \
+    rm -rf /boot /home /root /usr/local /srv && \
+    mkdir -p /var /sysroot /boot /usr/lib/ostree && \
+    ln -s var/opt /opt && \
+    ln -s var/roothome /root && \
+    ln -s var/home /home && \
+    ln -s sysroot/ostree /ostree && \
+    echo "$(for dir in opt usrlocal home srv mnt ; do echo "d /var/$dir 0755 root root -" ; done)" | tee -a /usr/lib/tmpfiles.d/bootc-base-dirs.conf && \
+    echo "d /var/roothome 0700 root root -" | tee -a /usr/lib/tmpfiles.d/bootc-base-dirs.conf && \
+    echo "d /run/media 0755 root root -" | tee -a /usr/lib/tmpfiles.d/bootc-base-dirs.conf && \
+    printf "[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n" | tee "/usr/lib/ostree/prepare-root.conf"
 
 # Allow people in group wheel to run all commands
 RUN mkdir -p /etc/sudoers.d && \
     echo "%wheel ALL=(ALL) ALL" | \
     tee "/etc/sudoers.d/wheel"
-
-# Necessary for `bootc install`
-RUN mkdir -p /usr/lib/ostree && \
-    printf "[composefs]\nenabled = yes\n[sysroot]\nreadonly = true\n" | \
-    tee "/usr/lib/ostree/prepare-root.conf"
 
 RUN bootc container lint
